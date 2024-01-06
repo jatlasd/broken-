@@ -1,6 +1,7 @@
-
+import { highlightAvailableSquares } from "../squareChanges/availableSquares.js";
 
 export function handlePawnMove() {
+  let squares = document.querySelectorAll('.square');
     squares.forEach((square) => {
       const [file, row] = square.id;
       const newRow = parseInt(row);

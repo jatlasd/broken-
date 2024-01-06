@@ -95,7 +95,7 @@ function handlePieceClick(e) {
     moveSquares.push(target.id);
     switch (target.dataset.piece) {
       case "pawn":
-        return handlePawnMove();
+        return handlePawnMove(target);
       case "rook":
         return handleRookMove();
       case "knight":
@@ -295,7 +295,14 @@ function clearCaptureClass() {
 
 //! Rook
 
-function handleRookMove() {}
+function handleRookMove() {
+  // const clickedFile = clickedPiece.file.charCodeAt(0);
+  // squares.forEach((square) => {
+  //   const [file, row] = square.id;
+  //   const newRow = parseInt(row);
+  //   for(let )
+  // });
+}
 
 //! Bishop
 
