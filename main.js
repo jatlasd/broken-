@@ -84,18 +84,19 @@ function removeHighlightAvailableSquares() {
 
 // TODO: Take the piece check out of handlePawnMove and implement a universal piece check in handlePieceClick
 
+
 function handlePieceClick(e) {
-  const target = e.target;
-  const isSelectedBlack = target.classList.contains("selected-black");
-  const isSelectedWhite = target.classList.contains("selected-white");
-  const isOdd = target.classList.contains("odd");
+  const square = e.target;
+  const isSelectedBlack = square.classList.contains("selected-black");
+  const isSelectedWhite = square.classList.contains("selected-white");
+  const isOdd = square.classList.contains("odd");
 
   if (!isSelectedBlack && !isSelectedWhite) {
-    target.classList.add(isOdd ? "selected-black" : "selected-white");
-    moveSquares.push(target.id);
-    switch (target.dataset.piece) {
+    square.classList.add(isOdd ? "selected-black" : "selected-white");
+    moveSquares.push(square.id);
+    switch (square.dataset.piece) {
       case "pawn":
-        return handlePawnMove(target);
+        return handlePawnMove(squares, clickedPiece, isEmpty, availableSquares, captureSquares, handleCaptureDown);
       case "rook":
         return handleRookMove();
       case "knight":
@@ -112,12 +113,46 @@ function handlePieceClick(e) {
     moveSquares = [];
     removeSelectedSquares();
     removeHighlightAvailableSquares();
-    if (target.dataset.move) {
-      target.dataset.move = "";
+    if (square.dataset.move) {
+      square.dataset.move = "";
     }
     clearCaptureClass();
   }
 }
+// function handlePieceClick(e) {
+//   const target = e.target;
+//   const isSelectedBlack = target.classList.contains("selected-black");
+//   const isSelectedWhite = target.classList.contains("selected-white");
+//   const isOdd = target.classList.contains("odd");
+
+//   if (!isSelectedBlack && !isSelectedWhite) {
+//     target.classList.add(isOdd ? "selected-black" : "selected-white");
+//     moveSquares.push(target.id);
+//     switch (target.dataset.piece) {
+//       case "pawn":
+//         return handlePawnMove(target, clickedPiece);
+//       case "rook":
+//         return handleRookMove();
+//       case "knight":
+//         return handleKnightMove();
+//       case "bishop":
+//         return handleBishopMove();
+//       case "king":
+//         return handleKingMove();
+//       case "queen":
+//         return handleQueenMove();
+//     }
+//   } else if (isSelectedBlack || isSelectedWhite) {
+//     clickedPiece = {};
+//     moveSquares = [];
+//     removeSelectedSquares();
+//     removeHighlightAvailableSquares();
+//     if (target.dataset.move) {
+//       target.dataset.move = "";
+//     }
+//     clearCaptureClass();
+//   }
+// }
 
 // Universal Piece Movement
 
@@ -128,8 +163,8 @@ function movePiece() {
 }
 
 function handleClick(e) {
+  const square = e.target
   const whiteToMove = colorToMove == "white";
-  const square = e.target;
   if (
     square.classList.contains("black-available") ||
     square.classList.contains("white-available")
@@ -143,6 +178,22 @@ function handleClick(e) {
     clickedPiece = {};
   }
 }
+// function handleClick(e) {
+//   const whiteToMove = colorToMove == "white";
+//   const square = e.target;
+//   if (
+//     square.classList.contains("black-available") ||
+//     square.classList.contains("white-available")
+//   ) {
+//     colorToMove = whiteToMove ? "black" : "white";
+//     removeMoveSquares();
+//     setNewSquare(square);
+//     clearOldSquare();
+//     removeHighlightAvailableSquares();
+//     moveSquares = [];
+//     clickedPiece = {};
+//   }
+// }
 
 function removeSelectedSquares() {
   squares.forEach((square) => {

@@ -1,13 +1,13 @@
 import { highlightAvailableSquares } from "../squareChanges/availableSquares.js";
 
-export function handlePawnMove() {
-  let squares = document.querySelectorAll('.square');
+export function handlePawnMove(squares, clickedPiece, isEmpty, availableSquares, captureSquares, handleCaptureDown) {
+  // let squares = document.querySelectorAll('.square');
     squares.forEach((square) => {
       const [file, row] = square.id;
       const newRow = parseInt(row);
   
       if (clickedPiece.piece === "pawn") {
-        checkPawnCapture(square);
+        checkPawnCapture(square, isEmpty, clickedPiece, captureSquares, handleCaptureDown);
         const moveDirection = clickedPiece.color === "white" ? 1 : -1;
   
         if (
@@ -17,7 +17,7 @@ export function handlePawnMove() {
         ) {
           if (file === clickedPiece.file) {
             availableSquares.push(`${file}${newRow}`);
-            highlightAvailableSquares();
+            highlightAvailableSquares(availableSquares);
           }
         } else if (
           clickedPiece.hasMoved &&
@@ -25,14 +25,14 @@ export function handlePawnMove() {
         ) {
           if (file === clickedPiece.file) {
             availableSquares.push(`${file}${newRow}`);
-            highlightAvailableSquares();
+            highlightAvailableSquares(availableSquares);
           }
         }
       }
     });
   }
 
-function checkPawnCapture(square) {
+function checkPawnCapture(square, isEmpty, clickedPiece, captureSquares, handleCaptureDown) {
     if (!isEmpty(clickedPiece)) {
       if (clickedPiece.piece === "pawn") {
         const fileDiff =
