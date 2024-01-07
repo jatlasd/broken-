@@ -84,7 +84,6 @@ function removeHighlightAvailableSquares() {
 
 // TODO: Take the piece check out of handlePawnMove and implement a universal piece check in handlePieceClick
 
-
 function handlePieceClick(e) {
   const square = e.target;
   const isSelectedBlack = square.classList.contains("selected-black");
@@ -96,7 +95,14 @@ function handlePieceClick(e) {
     moveSquares.push(square.id);
     switch (square.dataset.piece) {
       case "pawn":
-        return handlePawnMove(squares, clickedPiece, isEmpty, availableSquares, captureSquares, handleCaptureDown);
+        return handlePawnMove(
+          squares,
+          clickedPiece,
+          isEmpty,
+          availableSquares,
+          captureSquares,
+          handleCaptureDown
+        );
       case "rook":
         return handleRookMove();
       case "knight":
@@ -163,13 +169,16 @@ function movePiece() {
 }
 
 function handleClick(e) {
-  const square = e.target
+  const square = e.target;
   const whiteToMove = colorToMove == "white";
   if (
     square.classList.contains("black-available") ||
-    square.classList.contains("white-available")
+    square.classList.contains("white-available") ||
+    square.classList.contains("capture-white") ||
+    square.classList.contains("capture-black")
   ) {
     colorToMove = whiteToMove ? "black" : "white";
+    clearCaptureClass();
     removeMoveSquares();
     setNewSquare(square);
     clearOldSquare();
@@ -346,13 +355,119 @@ function clearCaptureClass() {
 
 //! Rook
 
+let rookMoves = [];
+
+let movesUp;
+let movesDown;
+let movesLeft;
+let movesRight;
+
+function allRookMoves() {
+  squares.forEach((square) => {
+    let split = square.id.split("");
+    let file = split[0].charCodeAt(0);
+    let row = parseInt(split[1]);
+    if (file == clickedPiece.file.charCodeAt(0)) {
+      rookMoves.push(square.id);
+    } else if (row == clickedPiece.row) {
+      rookMoves.push(square.id);
+    }
+  });
+}
+
+function filterPieceMoves() {
+  movesUp = [];
+  movesDown = [];
+  movesLeft = [];
+  movesRight = [];
+  for (const move of rookMoves) {
+    let square = document.getElementById(move);
+    if (square.dataset.occupied) {
+      let splitId = square.id.split("");
+      // If file is same, get squares above and below
+      if (splitId[0].charCodeAt(0) == clickedPiece.file.charCodeAt(0)) {
+        if (parseInt(splitId[1]) > parseInt(clickedPiece.row)) {
+          movesUp.push(parseInt(splitId[1]));
+        } else if (parseInt(splitId[1]) < parseInt(clickedPiece.row)) {
+          movesDown.push(parseInt(splitId[1]));
+        }
+        // If row is the same, get squares to left and right
+      } else if (parseInt(splitId[1]) == parseInt(clickedPiece.row)) {
+        if (splitId[0].charCodeAt(0) < clickedPiece.file.charCodeAt(0)) {
+          movesLeft.push(splitId[0].charCodeAt(0));
+        } else if (splitId[0].charCodeAt(0) > clickedPiece.file.charCodeAt(0)) {
+          movesRight.push(splitId[0].charCodeAt(0));
+        }
+      }
+    }
+  }
+}
+
+let blocked = {
+  up: "",
+  down: "",
+  left: "",
+  right: "",
+};
+
+function findPieceCaptures(clickedFile, clickedRow) {
+  squares.forEach((square) => {
+    const isOdd = square.dataset.color == "odd";
+    let splitId = square.id.split("");
+    let newFile = splitId[0].charCodeAt(0);
+    let newRow = parseInt(splitId[1]);
+    if (newFile == clickedFile) {
+      if (square.dataset.occupied) {
+        if (square.dataset.color !== clickedPiece.color) {
+          if (newRow == blocked.up || newRow == blocked.down) {
+            square.classList.add(isOdd ? "capture-black" : "capture-white");
+          }
+        }
+      }
+    } else if (newRow == clickedRow) {
+      if (square.dataset.occupied) {
+        if (square.dataset.color !== clickedPiece.color) {
+          if (newFile == blocked.left || newFile == blocked.right) {
+            square.classList.add(isOdd ? "capture-black" : "capture-white");
+          }
+        }
+      }
+    }
+    handleCaptureDown(square);
+  });
+}
+
 function handleRookMove() {
-  // const clickedFile = clickedPiece.file.charCodeAt(0);
-  // squares.forEach((square) => {
-  //   const [file, row] = square.id;
-  //   const newRow = parseInt(row);
-  //   for(let )
-  // });
+  allRookMoves();
+  filterPieceMoves();
+  blocked.up = Math.min(...movesUp);
+  blocked.down = Math.max(...movesDown);
+  blocked.left = Math.max(...movesLeft);
+  blocked.right = Math.min(...movesRight);
+
+  let clickedFile = clickedPiece.file.charCodeAt(0);
+  let clickedRow = parseInt(clickedPiece.row);
+
+  squares.forEach((square) => {
+    let splitId = square.id.split("");
+    let newFile = splitId[0].charCodeAt(0);
+    let newRow = parseInt(splitId[1]);
+    if (newFile == clickedFile) {
+      if (newRow < blocked.up && clickedRow < newRow) {
+        availableSquares.push(square.id);
+      } else if (newRow > blocked.down && clickedRow > newRow) {
+        availableSquares.push(square.id);
+      }
+    } else if (newRow == clickedRow) {
+      if (newFile > blocked.left && newFile < clickedFile) {
+        availableSquares.push(square.id);
+      } else if (newFile < blocked.right && newFile > clickedFile) {
+        availableSquares.push(square.id);
+      }
+    }
+  });
+  findPieceCaptures(clickedFile, clickedRow);
+  highlightAvailableSquares();
 }
 
 //! Bishop
